@@ -1,0 +1,27 @@
+{
+  "name": "news-notes",
+  "version": "1.0.0",
+  "description": "App that uses web scraping to collect news articles that users can comment on. The app uses mongodb to store the article info and comments.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msibilsk/news-notes.git"
+  },
+  "author": "Mary Sibilsky",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/msibilsk/news-notes/issues"
+  },
+  "homepage": "https://github.com/msibilsk/news-notes#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "cheerio": "^0.22.0",
+    "express": "^4.15.2",
+    "express-handlebars": "^3.0.0",
+    "mongoose": "^4.9.1",
+    "request": "^2.81.0"
+  }
+}
