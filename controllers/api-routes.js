@@ -27,6 +27,7 @@ var request = require("request");
 var cheerio = require("cheerio");
 
 //index route
+//**********need to change this route and make it for getting all saved articles**********
 router.get("/", function(req, res) {
     console.log("TRYING TO GET");
     Article.find({}, function(error, found) {
@@ -60,6 +61,32 @@ router.get("/scrape", function(req, res) {
       // This effectively passes the result object to the entry (and the title and link)
       var entry = new Article(result);
 
+      //**************need to push all of the articles into the handlebars object*****************
+
+      var hbsObject = {
+        articles: found
+      };
+      res.render("index", hbsObject);
+
+    });
+  });
+  // Tell the browser that we finished scraping the text
+  res.send("Scrape Complete");
+});
+
+router.post("/", function(req, res){
+      // Save an empty result object
+      var result = {};
+
+      // Add the text and href of every link, and save them as properties of the result object
+      //**********need to actually send this info from the front end - i think it is in hot restaurant**************
+      result.title = $(this).children("a").text();
+      result.link = $(this).children("a").attr("href");
+
+      // Using our Article model, create a new entry
+      // This effectively passes the result object to the entry (and the title and link)
+      var entry = new Article(result);
+
       // Now, save that entry to the db
       entry.save(function(err, doc) {
         // Log any errors
@@ -71,11 +98,6 @@ router.get("/scrape", function(req, res) {
           console.log(doc);
         }
       });
-
-    });
-  });
-  // Tell the browser that we finished scraping the text
-  res.send("Scrape Complete");
 });
 
 
