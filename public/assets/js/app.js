@@ -9,7 +9,8 @@ $(document).ready(function() {
 			width: $winwidth
 		});
 	});
-	$(".scrape").click(function() {
+	$(".scrape").click(function(e) {
+		e.preventDefault();
 		$.get("/scrape");
 	});
 	$(".save-article").click(function(){

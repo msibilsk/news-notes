@@ -33,6 +33,7 @@ router.get("/", function(req, res) {
     Article.find({}, function(error, found) {
         if (error) {
             console.log(error);
+            res.render("index");
         } else {
             var hbsObject = {
                 articles: found
@@ -43,62 +44,69 @@ router.get("/", function(req, res) {
 });
 
 router.get("/scrape", function(req, res) {
-  // First, we grab the body of the html with request
-  request("https://www.nytimes.com/", function(error, response, html) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
-    var $ = cheerio.load(html);
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("h2.story-heading").each(function(i, element) {
+    // First, we grab the body of the html with request
+    function createHbsObj() {
+      var articlesArr = [];
+      return new Promise(function(resolve, reject) {
+        request("https://www.nytimes.com/", function(error, response, html) {
+          // Then, we load that into cheerio and save it to $ for a shorthand selector
+          var $ = cheerio.load(html);
+          // Now, we grab every h2 within an article tag, and do the following:
 
-      // Save an empty result object
-      var result = {};
+          $("h2.story-heading").each(function(i, element) {
 
-      // Add the text and href of every link, and save them as properties of the result object
-      result.title = $(this).children("a").text();
-      result.link = $(this).children("a").attr("href");
+              // Save an empty result object
+              var result = {};
 
-      // Using our Article model, create a new entry
-      // This effectively passes the result object to the entry (and the title and link)
-      var entry = new Article(result);
+              // Add the text and href of every link, and save them as properties of the result object
+              result.title = $(this).children("a").text();
+              result.link = $(this).children("a").attr("href");
 
-      //**************need to push all of the articles into the handlebars object*****************
+              // Using our Article model, create a new entry
+              // This effectively passes the result object to the entry (and the title and link)
+              var entry = new Article(result);
 
-      var hbsObject = {
-        articles: found
-      };
-      res.render("index", hbsObject);
-
-    });
-  });
-  // Tell the browser that we finished scraping the text
-  res.send("Scrape Complete");
-});
-
-router.post("/", function(req, res){
-      // Save an empty result object
-      var result = {};
-
-      // Add the text and href of every link, and save them as properties of the result object
-      //**********need to actually send this info from the front end - i think it is in hot restaurant**************
-      result.title = $(this).children("a").text();
-      result.link = $(this).children("a").attr("href");
-
-      // Using our Article model, create a new entry
-      // This effectively passes the result object to the entry (and the title and link)
-      var entry = new Article(result);
-
-      // Now, save that entry to the db
-      entry.save(function(err, doc) {
-        // Log any errors
-        if (err) {
-          console.log(err);
-        }
-        // Or log the doc
-        else {
-          console.log(doc);
-        }
+              articlesArr.push(entry);
+          });
+          resolve(articlesArr);
+        });
       });
+    }
+    createHbsObj().then(function(result){
+      var hbsObject = {
+        articles: result
+      }; 
+      console.log(hbsObject);
+      res.render("index", hbsObject);
+    });
 });
+
+
+// router.post("/", function(req, res){
+//       // Save an empty result object
+//       var result = {};
+
+//       // Add the text and href of every link, and save them as properties of the result object
+//       //**********need to actually send this info from the front end - i think it is in hot restaurant**************
+//       result.title = $(this).children("a").text();
+//       result.link = $(this).children("a").attr("href");
+
+//       // Using our Article model, create a new entry
+//       // This effectively passes the result object to the entry (and the title and link)
+//       var entry = new Article(result);
+
+//       // Now, save that entry to the db
+//       entry.save(function(err, doc) {
+//         // Log any errors
+//         if (err) {
+//           console.log(err);
+//         }
+//         // Or log the doc
+//         else {
+//           console.log(doc);
+//         }
+//       });
+// });
 
 
 module.exports = router;
