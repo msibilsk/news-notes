@@ -1,5 +1,22 @@
 // Dependencies
 var express = require("express");
+var mongoose = require("mongoose");
+
+mongoose.Promise = Promise;
+mongoose.connect("mongodb://heroku_5dx6346c:5kddirfnhs09b9r3k4ora5pkk5@ds137100.mlab.com:37100/heroku_5dx6346c");
+var db = mongoose.connection;
+
+// Show any mongoose errors
+db.on("error", function(error) {
+    console.log("Mongoose Error: ", error);
+});
+
+// Once logged in to the db through mongoose, log a success message
+db.once("open", function() {
+    console.log("Mongoose connection successful.");
+});
+
+//initialize express app
 var app = express();
 
 //body-parser boilerplate
@@ -11,13 +28,18 @@ var exphbs = require("express-handlebars");
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
+// Set up an Express Router
+var router = express.Router();
+
+// Require routes file pass router object
+require("./config/routes")(router);
+
 //requiring models
 var Note = require("./models/Note.js");
 var Article = require("./models/Article.js");
 
-//require controllers
-var routes = require("./controllers/api-routes.js");
-app.use("/", routes);
+// Have every request go through router middleware
+app.use(router);
 
 //declare port
 var port = process.env.PORT || 3000;
